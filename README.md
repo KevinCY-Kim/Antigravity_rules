@@ -1,4 +1,4 @@
-# KevinCY-Kodex: The Ultimate Engineering Standard
+# KevinCY-Kodex: AI Engineering Standard & Playbook
 
 **Version:** 2025.11.27 (Universal Hybrid Edition)
 **Author:** KevinCY-Kim (System Architect)
@@ -8,16 +8,16 @@
 
 ## 1. 소개 (Introduction)
 
-`KevinCY-Kodex`는 현대적이고 견고한 AI 애플리케이션(RAG, Voice Bot)을 구축하기 위한 **Global Engineering Standard**입니다.
-단순한 코딩 규칙을 넘어, **Clean Architecture**, **Hybrid AI Strategy**, **Agent Safety**를 통합한 완전한 개발 플레이북을 제공합니다.
+`KevinCY-Kodex`는 확장 가능한 AI 애플리케이션(RAG, Voice Bot)을 구축하기 위해 설계된 **Unified Engineering Standard(통합 엔지니어링 표준)**입니다.
+**Clean Architecture**, **Hybrid AI Strategy**, **Agent Safety**를 기반으로, 기획부터 배포까지의 개발 프로세스를 체계화한 플레이북을 제공합니다.
 
-이 문서는 **인간 개발자**뿐만 아니라, **AI 에이전트(Antigravity)**가 프로젝트를 이해하고 자율적으로 코딩을 수행하기 위한 **최상위 지침서(Root Instruction)**입니다.
+이 문서는 **개발팀**뿐만 아니라, **AI 에이전트(Antigravity)**가 프로젝트 컨텍스트를 이해하고 일관성 있는 코드를 작성하기 위한 **핵심 지침서(Root Instruction)** 역할을 합니다.
 
 ---
 
 ## 2. 핵심 철학 (Core Philosophy)
 
-우리는 다음 3가지 원칙을 절대 타협하지 않습니다.
+우리는 다음 3가지 원칙을 기반으로 개발합니다.
 
 1.  **Clean Architecture (Universal):**
     -   도메인(예: 공공, 금융)이 바뀌어도 변하지 않는 견고한 구조.
@@ -32,7 +32,7 @@
 
 ## 3. KODEX 문서 체계 (Documentation Map)
 
-이 프로젝트는 **Single Source of Truth (SSoT)** 원칙에 따라, 각 영역별로 권한이 위임된 마스터 문서들로 구성됩니다.
+이 프로젝트는 **Single Source of Truth (SSoT)** 원칙에 따라, 각 영역별 가이드라인을 모듈화하여 관리합니다.
 
 ### 🏛️ 기반 표준 (Foundation)
 -   **`README.md` (This File):** 프로젝트의 대문이자 총괄 가이드.
