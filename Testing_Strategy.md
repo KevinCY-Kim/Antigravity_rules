@@ -1,7 +1,7 @@
 # KevinCY-Kodex — Testing Strategy
 
-**Version:** 2025.11  
-**Scope:** FastAPI · AI/RAG · Clean Architecture
+**Version:** 2025.11.27 (Universal Standard)
+**Scope:** FastAPI · AI/RAG · Clean Architecture · Pytest (Async)
 
 ---
 
@@ -49,13 +49,13 @@ Clean Architecture의 각 계층은 다음과 같은 전략에 따라 테스트�
     -   `Service`의 반환값이 `ResponseModel` 형식에 맞게 반환되는가?
 -   **도구**: FastAPI의 `TestClient`
 
-### 3.2 `/app/services`
+### 3.2 `/app/services` (Async Logic)
 -   **테스트 대상**:
     -   핵심 비즈니스 로직의 모든 분기(if/else 등).
+    -   **Hybrid Fallback**: API 호출 실패 시 Local LLM으로 전환되는 로직이 작동하는가?
     -   `Repository` 또는 `AI` 모듈의 함수를 올바른 인자와 함께 호출하는가?
-    -   외부 계층의 반환값에 따라 올바르게 동작하는가?
     -   예외 상황(Exception)을 올바르게 처리하는가?
--   **도구**: `pytest`, `pytest-mock` (외부 계층 모킹용)
+-   **도구**: `pytest`, `pytest-mock`, `pytest-asyncio` (비동기 함수 테스트용)
 
 ### 3.3 `/app/repositories`
 -   **테스트 대상**:
@@ -69,22 +69,24 @@ Clean Architecture의 각 계층은 다음과 같은 전략에 따라 테스트�
 ## 4. AI 파이프라인 테스트 전략 (AI Pipeline Testing Strategy)
 
 AI 모델의 비결정적인 특성을 고려하여, 결과물의 **내용**이 아닌 **구조와 형식**을 테스트하는 데 집중합니다.
+*(품질 평가는 `RAG.md`의 Evaluation Rules를 따릅니다.)*
 
 ### 4.1 RAG Retrieval 테스트
 -   **목표**: 특정 질문에 대해, 의도한 핵심 문서(Chunk)가 검색 결과 상위 N개에 포함되는지 검증합니다.
 -   **방법**: 미리 정의된 "질문-필수 청크 ID" 쌍을 만들어두고, `retriever` 함수 실행 후 결과에 필수 청크가 포함되어 있는지 `assert`문으로 확인합니다.
 
-### 4.2 LLM 응답 생성 테스트
--   **목표**: LLM이 생성하는 답변의 **형식(Format)**을 검증합니다. (내용의 진실성은 테스트하기 어려움)
+### 4.2 LLM 응답 생성 테스트 (Hybrid Strategy)
+-   **목표**: LLM이 생성하는 답변의 **형식(Format)**과 **Fallback 로직**을 검증합니다.
 -   **방법**:
-    -   LLM 호출을 모킹하여 미리 정의된 텍스트를 반환하도록 설정합니다.
-    -   답변 생성 함수가 이 텍스트를 받아, 최종적으로 유효한 JSON 구조를 반환하는지, 필수 키(`answer`, `sources` 등)를 포함하는지 검증합니다.
+    -   **Mocking**: `SKT A.X`와 `Ollama` 클라이언트를 각각 모킹하여, 고정된 더미 텍스트를 반환하게 합니다.
+    -   **Structure Check**: 답변 생성 함수가 이 더미 텍스트를 받아, 최종적으로 유효한 JSON 구조(`answer`, `sources`)를 반환하는지 검증합니다.
 
 ---
 
 ## 5. 테스트 환경 및 도구 (Test Environment & Tools)
 
 -   **Test Runner**: `pytest`
+-   **Async Plugin**: `pytest-asyncio` (FastAPI/LangGraph 비동기 테스트 필수)
 -   **Mocking Library**: `pytest-mock`
 -   **HTTP Client (API 테스트용)**: `TestClient` (from `fastapi.testclient`)
 -   **HTTP Client (외부 API 모킹용)**: `httpx`
@@ -94,10 +96,21 @@ AI 모델의 비결정적인 특성을 고려하여, 결과물의 **내용**이 
 ## 6. 테스트 실행 규칙 (Test Execution Rules)
 
 1.  모든 새로운 기능 추가 및 버그 수정은 반드시 관련 테스트 코드를 포함해야 합니다.
-2.  `main` 브랜치에 코드를 병합(Merge)하기 전, 모든 테스트(`unit`, `integration`)가 통과해야 합니다. (CI에서 강제)
-3.  테스트 코드 또한 `Code_Style.md`의 모든 규칙을 준수해야 합니다.
+2.  `main` 브랜치에 코드를 병합(Merge)하기 전, 모든 테스트(`unit`, `integration`)가 통과해야 합니다.
+3.  테스트 코드 또한 `Code_Style.md`의 모든 규칙(Naming, Type Hint)을 준수해야 합니다.
 4.  목표 테스트 커버리지는 **80% 이상**으로 유지하는 것을 권장합니다.
 
 ---
+
+## 7. Agent Protocol (Antigravity Guide)
+*에이전트가 터미널에서 테스트를 수행할 때 따르는 수칙입니다.*
+
+1.  **Command:** 테스트 실행 시 다음 명령어를 사용하십시오.
+    -   전체 테스트: `pytest`
+    -   상세 로그 포함: `pytest -v`
+    -   특정 파일만: `pytest tests/test_chat_service.py`
+2.  **Safety First:**
+    -   테스트 실행 전, `.env` 파일이 **Test Environment** 설정(예: `TEST_DB_URL`)을 가리키는지 확인하십시오.
+    -   **절대 Production DB에 연결된 상태로 테스트를 실행하지 마십시오.**
 
 End of KevinCY-Kodex Testing Strategy

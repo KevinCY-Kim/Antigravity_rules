@@ -1,81 +1,92 @@
-# KevinCY-Kodex: 궁극의 엔지니어링 표준
+# KevinCY-Kodex: The Ultimate Engineering Standard
 
-**Version:** 2025.11  
-**Author:** KevinCY-Kim (with Gemini Code Assist)
-
----
-
-## 1. 소개: KevinCY-Kodex란 무엇인가?
-
-`KevinCY-Kodex`는 현대적이고 높은 품질의 AI 애플리케이션을 구축하기 위한, 세계적인 수준의 포괄적인 엔지니어링 표준 및 지식 시스템입니다. 초기 설계와 아키텍처부터 개발, 테스트, 자동화된 배포에 이르기까지 소프트웨어 개발의 전체 생명주기를 다루는 완전한 플레이북을 제공합니다.
-
-이 `KODEX`는 단순한 규칙의 집합이 아니라, 그 기반 위에 구축된 모든 프로젝트의 일관성, 유지보수성, 확장성을 보장하도록 설계된 유기적으로 연결된 시스템입니다.
+**Version:** 2025.11.27 (Universal Hybrid Edition)
+**Author:** KevinCY-Kim (System Architect)
+**Compatible With:** GPT KODEX, Google Antigravity
 
 ---
 
-## 2. 핵심 철학
+## 1. 소개 (Introduction)
 
-`KevinCY-Kodex`는 세 가지 핵심 원칙을 기반으로 구축되었습니다:
+`KevinCY-Kodex`는 현대적이고 견고한 AI 애플리케이션(RAG, Voice Bot)을 구축하기 위한 **Global Engineering Standard**입니다.
+단순한 코딩 규칙을 넘어, **Clean Architecture**, **Hybrid AI Strategy**, **Agent Safety**를 통합한 완전한 개발 플레이북을 제공합니다.
 
-1.  **클린 아키텍처 (Clean Architecture)**: 우리는 관심사를 `routers`, `services`, `repositories`와 같은 명확한 계층으로 엄격하게 분리합니다. 이는 결합도를 최소화하고, 테스트 용이성을 극대화하며, 코드베이스를 이해하고 유지보수하기 쉽게 만듭니다.
-2.  **단일 진실 공급원 (Single Source of Truth, SSoT)**: 모든 정보나 규칙은 단 하나의 권위 있는 "마스터" 문서에만 존재합니다. 다른 모든 문서는 이 단일 소스를 참조하여 중복을 제거하고 충돌을 방지합니다. 이는 전체 문서군을 놀랍도록 쉽게 유지보수할 수 있게 합니다.
-3.  **전체 생명주기 포괄 (Full Lifecycle Coverage)**: 우리는 단순히 코드를 *작성*하는 것뿐만 아니라, 품질 보증(`Testing_Strategy.md`)과 자동화된 운영(`Deployment_CICD.md`)을 포함한 전체 엔지니어링 프로세스에 대한 표준을 제공합니다.
-
----
-
-## 3. KODEX의 구조 (목차)
-
-`KODEX`는 각 특정 도메인에 대한 마스터 가이드 역할을 하는 일련의 전문화된 문서들로 구성됩니다.
-
-### 기반 표준 (Foundational Standards)
--   **`README.md` (이 파일)**: 전체 `KODEX`의 메인 진입점이자 개요.
--   **`rules.md`**: 프로젝트를 관장하는 최상위 공식 규칙 및 원칙.
--   **`Architecture.md`**: 시스템의 구성 요소와 데이터 흐름을 설명하는 최상위 청사진.
--   **`Folder_Standards.md`**: 프로젝트의 디렉토리 구조에 대한 마스터 가이드. **모든 폴더 관련 질문은 이 문서에서 답을 찾아야 합니다.**
--   **`Code_Style.md`**: 모든 코딩 컨벤션, 포매팅, 네이밍 규칙에 대한 최종 가이드.
-
-### AI 및 도메인 특화 가이드라인
--   **`RAG.md`**: 정보 수집부터 답변 생성까지, RAG(검색 증강 생성) 파이프라인 구현을 위한 마스터 가이드.
--   **`Voice_Pipeline.md`**: 음성 처리 파이프라인(STT → RAG → TTS) 구축을 위한 표준.
--   **`Prompt.md`**: 시스템 프롬프트, 사용자 템플릿, 페르소나 정의를 포함한 모든 AI 프롬프트의 중앙 라이브러리 및 규칙집.
-
-### 품질 및 운영 (Quality & Operations)
--   **`Testing_Strategy.md`**: 코드 품질 보증을 위한 플레이북. AI 파이프라인을 포함한 모든 계층의 테스트 대상과 방법을 정의합니다.
--   **`Deployment_CICD.md`**: 운영 자동화를 위한 가이드. CI/CD 파이프라인, Docker 표준, 민감 정보 관리를 정의합니다.
-
-### 이중 언어 지원 (Bilingual Support)
--   모든 문서는 한국어와 영어 (`_eng.md` 접미사)로 모두 제공됩니다. **한국어 버전이 원본이며, 영어 버전은 이를 번역한 것입니다.** 이는 모든 개발자나 AI 어시스턴트의 보편적인 접근성을 보장합니다.
+이 문서는 **인간 개발자**뿐만 아니라, **AI 에이전트(Antigravity)**가 프로젝트를 이해하고 자율적으로 코딩을 수행하기 위한 **최상위 지침서(Root Instruction)**입니다.
 
 ---
 
-## 4. KODEX 사용법: 개발자 워크플로우
+## 2. 핵심 철학 (Core Philosophy)
 
-신규 개발자는 `KODEX` 기반 프로젝트에 원활하게 적응하기 위해 다음 워크플로우를 따라야 합니다.
+우리는 다음 3가지 원칙을 절대 타협하지 않습니다.
 
-1.  **여기서 시작하세요**: 이 `README.md`를 읽고 프로젝트의 철학과 구조를 이해합니다.
-2.  **큰 그림 보기**: `Architecture.md`를 검토하여 전체 시스템 설계를 이해합니다.
-3.  **작업 공간 설정**: `Folder_Standards.md`를 사용하여 올바른 디렉토리를 생성하고 파일이 어디에 위치해야 하는지 파악합니다.
-4.  **고품질 코드 작성**:
-    -   `Code_Style.md`의 컨벤션을 따릅니다.
-    -   `RAG.md`, `Voice_Pipeline.md`, `Prompt.md`에 따라 AI 기능을 구현합니다.
-5.  **신뢰성 확보**: `Testing_Strategy.md`의 전략에 따라 코드에 대한 테스트를 작성합니다.
-6.  **자신감 있게 배포**: 코드를 푸시합니다. `Deployment_CICD.md`에 정의된 자동화된 CI/CD 파이프라인이 나머지를 처리할 것입니다.
-
----
-
-## 5. 최종 비전
-
-`KevinCY-Kodex`는 단순한 문서를 넘어, 탁월함을 위한 자동화되고 자기 일관적인 시스템입니다. 이 표준을 따름으로써, 우리는 최고의 엔지니어링 품질을 충족하는 견고하고, 유지보수 가능하며, 확장 가능한 AI 애플리케이션을 지속적으로 구축할 수 있습니다.
-
-이것이 우리 성공의 기반입니다.
+1.  **Clean Architecture (Universal):**
+    -   도메인(예: 공공, 금융)이 바뀌어도 변하지 않는 견고한 구조.
+    -   `Router` -> `Service` -> `Repository/AI` 계층의 엄격한 분리.
+2.  **Hybrid AI Strategy (Cost & Privacy):**
+    -   **API (SKT A.X)**와 **Local (Ollama)** 모델을 상황에 맞춰 유동적으로 전환.
+    -   비용 효율성과 데이터 보안을 동시에 달성.
+3.  **Agent Safety First (Antigravity Protocol):**
+    -   AI 에이전트가 자율적으로 코드를 실행할 때 발생할 수 있는 사고(삭제, 유출)를 원천 차단하는 **안전 수칙(Guardrails)** 내재화.
 
 ---
 
-## 6. 저작권 및 라이선스 (Copyright and License)
+## 3. KODEX 문서 체계 (Documentation Map)
 
-`KevinCY-Kodex`의 콘텐츠는 다음과 같은 듀얼 라이선스 정책을 따릅니다. 이를 통해 누구나 자유롭게 지식을 활용하고 기여할 수 있도록 장려합니다.
+이 프로젝트는 **Single Source of Truth (SSoT)** 원칙에 따라, 각 영역별로 권한이 위임된 마스터 문서들로 구성됩니다.
 
--   **문서 (Documentation):** 모든 `.md` 파일 및 기타 문서 콘텐츠는 **Creative Commons Attribution 4.0 International (CC BY 4.0)** 라이선스에 따라 배포됩니다. 저작자를 표시하면 상업적 이용을 포함한 모든 형태의 사용, 복제, 수정, 배포가 가능합니다.
--   **코드 (Code):** 문서에 포함된 모든 소스 코드 예제는 **MIT 라이선스**에 따라 배포됩니다. 누구나 제한 없이 코드를 사용, 복제, 수정, 병합, 게시, 배포, 서브라이선스 및/또는 판매할 수 있습니다.
+### 🏛️ 기반 표준 (Foundation)
+-   **`README.md` (This File):** 프로젝트의 대문이자 총괄 가이드.
+-   **`rules.md` (Master Rule):** 에이전트 행동 강령 및 전체 규칙의 허브(Hub). **AI는 작업 전 반드시 이 파일을 먼저 읽어야 함.**
+-   **`Architecture.md`**: 시스템 청사진 (FastAPI + HTMX + Hybrid LLM).
+-   **`Folder_Standards.md`**: 디렉토리 구조 및 데이터 파이프라인 표준.
+-   **`Code_Style.md`**: Python(Async), Type Hint, Naming Convention 등 코딩 표준.
 
-Copyright (c) 2025 KevinCY-Kim. All rights reserved.
+### 🧠 AI & 도메인 가이드 (AI Engine)
+-   **`RAG.md`**: 데이터 수집부터 답변 생성까지의 검색 증강 생성(RAG) 파이프라인 표준.
+-   **`Voice_Pipeline.md`**: STT(Whisper) → RAG → TTS로 이어지는 음성 처리 표준.
+-   **`Prompt.md`**: 페르소나, 시스템 프롬프트, 에이전트 자가 검증(Self-Correction) 프롬프트 라이브러리.
+
+### ⚙️ 품질 및 운영 (Ops & Quality)
+-   **`Testing_Strategy.md`**: 단위/통합 테스트 및 AI 로직 검증 전략.
+-   **`Deployment_CICD_Guideline.md`**: Docker(CPU/GPU), GitHub Actions, 모델 배포 전략.
+
+### 🌐 이중 언어 지원 (Bilingual Support)
+-   모든 문서는 **한국어(Primary)**와 **영어(Secondary, `_eng.md`)**로 병행 관리됩니다.
+-   내용 간 충돌이 발생할 경우, **한국어 문서가 최우선 권한(Source of Truth)**을 가집니다. AI 에이전트는 한국어 문서를 기준으로 작업을 수행해야 합니다.
+
+---
+
+## 4. Antigravity Agent Protocol (For AI Agents)
+
+*이 섹션은 이 문서를 읽고 있는 AI 에이전트(Cursor, Antigravity)를 위한 직접 명령입니다.*
+
+1.  **Safety Check:** 터미널 명령(`rm`, `drop`) 실행 전, 반드시 사용자 승인을 요청하십시오.
+2.  **Context Loading:** 작업 시작 전 `rules.md`를 읽고 현재 프로젝트의 도메인(Context)을 파악하십시오.
+3.  **Hybrid Mode:** 코드를 작성할 때 `SKT A.X` (Primary)와 `Ollama` (Fallback) 로직을 항상 고려하십시오.
+4.  **Self-Correction:** 코드를 작성한 후 `Testing_Strategy.md`에 따라 검증 테스트 코드를 함께 제안하십시오.
+
+---
+
+## 5. 개발자 워크플로우 (Developer Workflow)
+
+신규 개발자(또는 AI)는 다음 순서로 프로젝트에 기여합니다.
+
+1.  **Initialize:** `Folder_Standards.md`를 참조하여 프로젝트 뼈대를 생성합니다.
+2.  **Implement:**
+    -   비즈니스 로직은 `Architecture.md`의 Clean Architecture를 준수합니다.
+    -   AI 기능은 `RAG.md`와 `Voice_Pipeline.md`의 스펙을 따릅니다.
+3.  **Verify:** `Testing_Strategy.md`에 따라 `pytest`를 실행하여 안정성을 확보합니다.
+4.  **Deploy:** `Deployment_CICD_Guideline.md`에 따라 Docker 이미지를 빌드하고 배포합니다.
+
+---
+
+## 6. 저작권 및 라이선스 (License)
+
+`KevinCY-Kodex`는 지식의 공유와 발전을 지향합니다.
+
+-   **Documentation (CC BY 4.0):** 저작자 표시(KevinCY-Kim) 하에 자유로운 수정 및 배포 가능.
+-   **Code Samples (MIT License):** 상업적 이용을 포함한 제한 없는 코드 사용 허용.
+
+---
+**Build robust, Run safe.**
+*Copyright (c) 2025 KevinCY-Kim. All rights reserved.*

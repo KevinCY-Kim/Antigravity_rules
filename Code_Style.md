@@ -188,22 +188,25 @@ AI 및 LangGraph 관련 폴더 구조는 프로젝트 전체 표준을 따릅니
         return {**state, "retrieved_docs": docs}
     ```
 
-### 7.3 LLM 호출 스타일
+### 7.3 LLM 호출 스타일 (Hybrid Config 준수)
 
-```python
-async def generate_answer(context: str, question: str) -> str:
-    prompt = f"""
-당신은 공식 문서를 기반으로 답하는 전문가입니다.
-반드시 근거를 기반으로 답하고, 모르면 모른다고 말하세요.
+-   Master Rule에 정의된 `AX_MODEL_NAME` 등의 환경 변수를 활용합니다.
+    ```python
+    from app.core.config import settings
 
-[문맥]
-{context}
-
-[질문]
-{question}
-"""
-    return await llm_client.chat(prompt)
-```
+    async def generate_answer(context: str, question: str) -> str:
+        prompt = f"""
+        [규칙] 근거 기반 답변, 모르면 모른다고 하기.
+        [문맥] {context}
+        [질문] {question}
+        """
+        # SKT A.X or Ollama 호출 (설정에 따름)
+        return await llm_client.chat(
+            model=settings.AX_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=settings.AX_TEMPERATURE
+        )
+    ```
 
 ---
 
@@ -211,19 +214,19 @@ async def generate_answer(context: str, question: str) -> str:
 
 ### 8.1 Chunking
 
--   **기본 설정**: `chunk_size = 800`, `chunk_overlap = 200`
+--   **기본 설정**: `chunk_size = 800`, `chunk_overlap = 200`
     ```python
     def chunk_text(content: str, size: int = 800, overlap: int = 200) -> list[str]:
         chunks: list[str] = []
         start = 0
         length = len(content)
-    
+
         while start < length:
             end = min(start + size, length)
             chunk = content[start:end]
             chunks.append(chunk)
             start += size - overlap
-    
+
         return chunks
     ```
 
@@ -232,11 +235,11 @@ async def generate_answer(context: str, question: str) -> str:
 -   **Hybrid**: 키워드(`BM25`) + 벡터 검색 조합
 -   `Rerank`는 별도 함수/모듈로 분리합니다.
     ```python
-    def hybrid_search(query: str, k: int = 10) -> list[dict]:
-        keyword_docs = bm25_search(query, k=k)
-        vector_docs = dense_search(query, k=k)
+    async def hybrid_search(query: str, k: int = 10) -> list[dict]:
+        keyword_docs = await bm25_search(query, k=k)
+        vector_docs = await dense_search(query, k=k)
         merged = merge_results(keyword_docs, vector_docs)
-        return rerank(query, merged)
+        return await rerank(query, merged)
     ```
 
 ### 8.3 Answer Generation

@@ -1,7 +1,23 @@
-# KevinCY-Kodex — Official Rules
-
-**Version:** 2025.11  
+# KevinCY-Kodex — Official Universal Rules
+**System Context:** GPT KODEX Base + Antigravity Safety Protocol
+**Version:** 2025.11.27 (Hybrid LLM Edition)
 **Author:** KevinCY-Kim
+
+> **SYSTEM OVERRIDE (For Antigravity Agent):**
+> 본 환경이 코드를 직접 실행하는 **Agent(Antigravity)** 환경일 경우, 아래 **[Section 0]**의 안전 수칙을 최우선으로 적용하십시오.
+> 그 외 로직 생성 및 답변 작성 시에는 기존 **[Section 1~10]**의 GPT KODEX 규칙을 따릅니다.
+
+---
+
+## 0. Antigravity Safety & Execution Protocols
+*(이 섹션은 에이전트가 터미널/브라우저를 제어할 때만 적용됩니다)*
+
+1.  **Context Initialization (도메인 확인):**
+    -   작업 시작 전, 사용자에게 **"현재 프로젝트의 도메인(예: 공공, 사내, 커머스 등)"**을 확인하여 비즈니스 로직의 방향을 잡으십시오.
+2.  **Execution Guardrails (실행 안전):**
+    -   파일 영구 삭제(`rm`, `del`), DB Table Drop, 외부 네트워크 전송 등 **비가역적 명령어**는 사용자 승인 없이는 절대 실행하지 마십시오.
+3.  **Reference Loading (파일 연결):**
+    -   `Folder_Standards.md`, `Prompt.md` 등 하위 규칙 파일의 참조가 필요할 경우, 즉시 해당 파일을 읽고 컨텍스트에 반영하십시오.
 
 ---
 
@@ -32,10 +48,22 @@
     -   각 노드는 단일 역할(state update, retriever, generator 등)을 가진다.
     -   Graph 호출부는 서비스 계층에서 관리한다.
 
-3.  **Local LLM 운영 규칙**
-    -   운영 VRAM을 고려하여 가능한 경우 `Ollama` 또는 `SKT A.X-4.0-Light` 사용
-    -   GPU 메모리 초과 방지를 위해 `max_tokens`와 `num_ctx`를 명확히 지정한다.
-    -   Prompt는 `system` / `developer` / `user` 계층으로 분리한다.
+3.  **LLM Model Strategy (Hybrid Operation)**
+    *상황에 따라 아래 **Track A(API)** 또는 **Track B(Local)**를 선택적으로 적용한다.*
+
+    * **Track A: API Mode (Primary / Cloud)**
+        * 기본적으로 비용 효율성이 높은 **SKT A.X-4.0** 모델을 사용한다.
+        * **Constants (Strict):** 다음 설정을 고정적으로 사용한다.
+            * `AX_MODEL_NAME=ax4`
+            * `AX_TEMPERATURE=0.2`
+            * `AX_MAX_TOKENS=512`
+
+    * **Track B: Local Mode (Secondary / On-Premise)**
+        * 보안, 오프라인, 비용 절감이 우선될 경우 `Ollama` 또는 `SKT A.X-4.0-Light`를 사용한다.
+        * **Resource Management:** 운영 VRAM 한계를 고려하여 `max_tokens`와 `num_ctx`를 명확히 지정하여 OOM(Out of Memory)을 방지한다.
+
+    * **Common Prompt Rule (공통):**
+        * 어떤 모델을 쓰든 Prompt는 `system` / `developer` / `user` 계층으로 분리하는 구조를 엄수한다.
 
 4.  **RAG Answer 처리**
     -   JSON 형태로 정제(cleaning)한다.
@@ -92,15 +120,14 @@ GPT는 아래 6가지 항목을 기준으로 리뷰하며, 각 항목을 **점�
 
 ---
 
-## 6. Business/Consulting Rules (AI 오피스/공공/산업 AI 기준)
+## 6. Business/Consulting Rules (Universal Standard)
 
-GPT는 답변 시 다음 중 하나 이상을 고려하며, **실무 중심 + 근거 기반**으로 작성한다.
+GPT는 답변 시 **현재 프로젝트의 도메인(Context)**을 최우선으로 고려하며, 다음 범주 중 하나 이상을 적용하여 실무 중심으로 답변한다.
 
--   사내문서 요약/검색/정책 정리
--   민원 챗봇, 행정 문서 기반 QA
--   산업 데이터 분석 및 제조 대시보드
--   R&D 제안서 생성/정리 자동화
--   클라이언트 납품용 문서 품질 기준
+-   **Enterprise/Public:** 사내문서 요약, 규정 검색, 정책 정리, 민원/상담 챗봇.
+-   **Data Analytics:** 산업 데이터 분석, 제조 모니터링 대시보드.
+-   **Documentation:** R&D 제안서 생성, 보고서 자동화, 납품용 품질 기준.
+-   **Consulting:** 클라이언트의 요구사항을 기술적 스펙으로 구체화.
 
 ---
 

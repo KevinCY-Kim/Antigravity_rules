@@ -1,8 +1,7 @@
-KevinCY-Kodex — Folder Standards
-
-**Version:** 2025.11  
+# KevinCY-Kodex — Folder Standards
+**Version:** 2025.11.27 (Universal Standard)
 **Scope:** FastAPI · LangGraph · RAG · STT/TTS · Web(HTMX+Tailwind)
-
+**Viewer Note:** Please render tree structures in fixed-width font (Code Block).
 ---
 
 ## 1. Overview
@@ -29,27 +28,30 @@ KevinCY-Kodex — Folder Standards
 
 ```
 project-root/
+├── app/                  # Application Core Logic
+│   ├── core/             # Settings, Security, Logger
+│   ├── routers/          # API Endpoints (Controller)
+│   ├── services/         # Business Logic
+│   ├── repositories/     # I/O Layer (DB, File, API)
+│   ├── models/           # Pydantic Schemas
+│   ├── ai/               # AI Engine (LLM, RAG, Graph)
+│   └── utils/            # Shared Utilities
 │
-├── app/
-│   ├── core/
-│   ├── routers/
-│   ├── services/
-│   ├── repositories/
-│   ├── models/
-│   ├── ai/
-│   └── utils/
+├── templates/            # Jinja2 HTML Templates
+│   ├── layout/           # Base Layouts
+│   ├── pages/            # Page Content
+│   └── partials/         # HTMX Components
 │
-├── templates/
-├── static/
+├── static/               # Static Assets (CSS, JS, Images)
+├── tests/                # Pytest Cases
+├── data/                 # (Optional) Local Data Storage
 │
-├── tests/
-│
-├── .env
-├── .env.example
-├── requirements.txt
-├── README.md
-├── Makefile
-└── main.py
+├── .env                  # Environment Variables (Git Ignored)
+├── .env.example          # Env Template
+├── requirements.txt      # Python Dependencies
+├── README.md             # Project Documentation
+├── Makefile              # Automation Scripts
+└── main.py               # App Entry Point
 ```
 
 ---
@@ -69,12 +71,12 @@ project-root/
 
 ## 4. /app/routers — API Endpoint Layer
 
-FastAPI 엔드포인트를 정의합니다.
+FastAPI 엔드포인트를 정의합니다. 비즈니스 로직을 절대 포함하지 않습니다.
 
 -   **규칙**:
     -   파일명: `xxx_router.py`
     -   라우터 변수명: `router`
-    -   역할: `Request` → `Service` 호출 → `Response` 반환
+    -   역할: `Request` 수신 → `Service` 호출 → `Response` 반환
 -   **예시**: `chat_router.py`, `voice_router.py`, `health_router.py`
 
 ---
@@ -121,17 +123,16 @@ AI 관련 모든 구성 요소를 담당하는 영역입니다.
 -   **권장 세부 구조**:
     ```
     /app/ai/
-      ├── graph.py
-      ├── llm_client.py
-      ├── ingest/
-      ├── chunk/
-      ├── embed/
-      ├── retriever/
-      ├── reranker/
-      ├── generator/
-      ├── postprocess/
-      ├── stt/
-      └── tts/
+    ├── graph.py              # LangGraph Main Workflow
+    ├── llm_client.py         # LLM Client Wrapper (API/Local)
+    ├── ingest/               # Document Loading Logic
+    ├── chunk/                # Text Splitter Logic
+    ├── embed/                # Embedding Model Logic
+    ├── retriever/            # Vector DB Search Logic
+    ├── reranker/             # Re-ranking Logic
+    ├── generator/            # Prompt & Generation Logic
+    ├── stt/                  # Speech-to-Text Logic
+    └── tts/                  # Text-to-Speech Logic
     ```
 -   **역할**: LangGraph 파이프라인, LLM 호출, RAG 구성요소, 음성 처리(STT/TTS)
 
@@ -152,24 +153,24 @@ HTMX와 Tailwind 기반의 UI 템플릿을 관리합니다.
 -   **구조 표준**:
     ```
     /templates/
-      ├── layout/ (base.html, header.html, footer.html)
-      ├── pages/ (index.html, chat.html, voice_chat.html)
-      └── partials/ (chat_message.html, loader.html, error.html)
+    ├── layout/               # base.html, header.html, footer.html
+    ├── pages/                # index.html, chat.html, voice_chat.html
+    └── partials/             # chat_message.html, loader.html
     ```
 
 ---
 
 ## 11. /static — CSS, JS, Assets
 
-컴파일된 CSS, JS, 이미지, 오디오 파일 등을 저장합니다.
+정적 리소스 저장소로 컴파일된 CSS, JS, 이미지, 오디오 파일 등을 저장합니다.
 
 -   **구성 예시**:
     ```
     /static/
-      ├── css/ (tailwind.css)
-      ├── js/ (main.js)
-      ├── img/
-      └── tts/
+    ├── css/                  # tailwind.css (Compiled)
+    ├── js/                   # main.js (HTMX Extensions)
+    ├── img/                  # Images
+    └── tts/                  # Generated Audio Files (Temp)
     ```
 
 ---
@@ -186,11 +187,11 @@ HTMX와 Tailwind 기반의 UI 템플릿을 관리합니다.
 
 ## 13. Top-Level Files
 
--   `.env` / `.env.example`: 환경 변수 파일
--   `requirements.txt`: Python 의존성 목록
+-   `.env` / `.env.example`: 환경 변수 파일(API Key, DB URL 등)
+-   `requirements.txt`: Python 의존성 패키지 목록
 -   `Makefile`: 실행/테스트/배포 스크립트
 -   `README.md`: 프로젝트 개요 및 가이드
--   `main.py`: FastAPI 애플리케이션 엔트리 포인트
+-   `main.py`: FastAPI 앱 실행 진입점 (uvicorn.run)
 
 ---
 
@@ -230,7 +231,7 @@ HTMX와 Tailwind 기반의 UI 템플릿을 관리합니다.
 
 ## 16. 파주시·공공 프로젝트 특화 구조
 
-공공 문서 프로젝트에서는 원본 데이터와 처리된 데이터를 관리하기 위해 `data/` 폴더를 포함할 수 있습니다.
+RAG/문서 처리 프로젝트를 위한 표준 데이터 폴더로 원본 데이터와 처리된 데이터를 관리하기 위해 `data/` 폴더를 포함할 수 있습니다.
 
 ```
 project-root/
