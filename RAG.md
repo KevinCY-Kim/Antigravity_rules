@@ -101,19 +101,19 @@ RAG 관련 모듈의 폴더 구조는 프로젝트 전체 표준을 따릅니다
 
 ## 7. Answer Generation Rules (The "LLM" Phase)
 
-### 7.1 Prompt 정책
+### 7.1 Prompt 정책 (Hybrid Strategy)
 *`Code_Style.md` 및 `rules.md`의 설정을 준수합니다.*
 -   **API Mode (Primary):** `SKT A.X-4.0` (Env: `AX_MODEL_NAME`) 사용. 복잡한 추론과 고품질 작문에 적합.
 -   **Local Mode (Fallback):** `Ollama` (Llama 3, Mistral) 사용. 단순 요약이나 보안 데이터 처리에 적합.
 
-### 7.2 출력 형태
+### 7.2 응답 생성 원칙 & Constraints
 **Role:** System Prompt에 "문서 기반 답변 전문가" 역할을 부여합니다.
 -   **Constraints:**
     -   *"주어진 컨텍스트 내에서만 답변하라."* (Hallucination 방지)
     -   *"답변의 근거가 되는 문장을 반드시 인용하라."* (Citation)
     -   *"모르면 모른다고 답하라."* (Honesty)
 
-### 7.3 응답 규칙
+### 7.3 Output Schema (JSON)
 ```json
   {
     "answer": "생성된 최종 답변 텍스트",
@@ -172,9 +172,10 @@ RAG 관련 모듈의 폴더 구조는 프로젝트 전체 표준을 따릅니다
 
 ## 11. 운영(Production) 규칙
 
-### 11.1 Index Versioning
+### 11.1 Index Versioning & Safety
 -   매 `ingest` 작업마다 `index_version=YYYYMMDD_vX` 태그를 적용하여 관리합니다.
--   오래된 인덱스 버전은 삭제하되, 문서 내용 변경 시 해당 문서는 **전부 재임베딩(Full Re-indexing)** 하는 것을 원칙으로 합니다.
+-   **Deletion Guard**: 오래된 인덱스는 삭제하되, 에이전트는 인덱스 삭제(drop) 작업 전 반드시 사용자 승인을 받아야 합니다.
+-   문서 변경 시 해당 문서는 전부 재임베딩(Full Re-indexing) 하는 것을 원칙으로 합니다.
 
 ### 11.2 Monitoring
 -   **Retrieval hit ratio**: 검색 성공률

@@ -229,7 +229,7 @@ HTMX와 Tailwind 기반의 UI 템플릿을 관리합니다.
 
 ---
 
-## 16. 파주시·공공 프로젝트 특화 구조
+## 16. Data Pipeline Structure (Universal)
 
 RAG/문서 처리 프로젝트를 위한 표준 데이터 폴더로 원본 데이터와 처리된 데이터를 관리하기 위해 `data/` 폴더를 포함할 수 있습니다.
 

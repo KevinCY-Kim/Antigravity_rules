@@ -9,6 +9,7 @@
 
 -   모든 코드에 **`type hint` 100%** 적용
 -   함수는 **단일 책임 원칙(SRP)** 준수
+-   **Async First:** 모든 DB, API, File I/O 작업은 `async def` / `await` 패턴을 필수로 사용
 -   변수명, 함수명, 파일명은 의미 기반으로 네이밍
 -   매직 넘버/문자열(hard-coded values) 금지 → `settings`/`config`/상수로 분리
 -   비즈니스 로직 흐름: `routers` → `services` → `repositories`/`ai`
@@ -162,9 +163,9 @@
     ```python
     from typing import Sequence
     from app.models.chunk_model import Chunk
-    
-    def load_chunks(document_id: str) -> Sequence[Chunk]:
-        """문서 ID에 해당하는 청크 목록을 로드한다."""
+
+    async def load_chunks(document_id: str) -> Sequence[Chunk]:
+        """문서 ID에 해당하는 청크 목록을 비동기로 로드한다."""
         # ... DB 또는 파일 시스템 로직 ...
         pass
     ```
@@ -214,7 +215,7 @@ AI 및 LangGraph 관련 폴더 구조는 프로젝트 전체 표준을 따릅니
 
 ### 8.1 Chunking
 
---   **기본 설정**: `chunk_size = 800`, `chunk_overlap = 200`
+-   **기본 설정**: `chunk_size = 800`, `chunk_overlap = 200`
     ```python
     def chunk_text(content: str, size: int = 800, overlap: int = 200) -> list[str]:
         chunks: list[str] = []

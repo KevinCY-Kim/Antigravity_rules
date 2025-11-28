@@ -35,7 +35,7 @@
 이 프로젝트는 **Single Source of Truth (SSoT)** 원칙에 따라, 각 영역별 가이드라인을 모듈화하여 관리합니다.
 
 ### 🏛️ 기반 표준 (Foundation)
--   **`README.md` (This File):** 프로젝트의 대문이자 총괄 가이드.
+-   **`README.md` (This File):** 프로젝트 개요 및 총괄 가이드.
 -   **`rules.md` (Master Rule):** 에이전트 행동 강령 및 전체 규칙의 허브(Hub). **AI는 작업 전 반드시 이 파일을 먼저 읽어야 함.**
 -   **`Architecture.md`**: 시스템 청사진 (FastAPI + HTMX + Hybrid LLM).
 -   **`Folder_Standards.md`**: 디렉토리 구조 및 데이터 파이프라인 표준.
