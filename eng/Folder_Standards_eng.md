@@ -1,104 +1,106 @@
 # KevinCY-Kodex — Folder Standards
-
-**Version:** 2025.11  
+**Version:** 2025.11.27 (Universal Standard)
 **Scope:** FastAPI · LangGraph · RAG · STT/TTS · Web(HTMX+Tailwind)
-
+**Viewer Note:** Please render tree structures in fixed-width font (Code Block).
 ---
 
 ## 1. Overview
 
-This document defines the standard rules for the project's file and folder structure.
-The project is composed of the following core layers, based on Clean Architecture principles.
+This document defines the standard rules for the project file and folder structure.
+The project is composed of the following core layers according to Clean Architecture principles:
 
 -   `core`: Core settings, logger, security, etc.
 -   `routers`: API endpoints
 -   `services`: Business logic
--   `repositories`: Database, files, external APIs, etc. (IO)
+-   `repositories`: IO such as database, file, external API
 -   `models`: Pydantic schemas
--   `ai`: LLM, RAG, LangGraph, etc. (AI Engine)
--   `utils`: Common utilities
+-   `ai`: AI engines such as LLM, RAG, LangGraph
+-   `utils`: Shared utilities
 -   `templates` & `static`: Web frontend
 
-Each layer must have a **Single Responsibility (SRP)** and adhere to the inter-layer dependency direction.
+Each layer must possess **Single Responsibility Principle (SRP)** and adhere to the direction of dependency between layers.
 
 ---
 
 ## 2. Root Folder Structure (Top-Level)
 
-The following is the top-level structure of a `KevinCY-Kodex` project.
+Below is the top-level structure of the `KevinCY-Kodex` project.
 
 ```
 project-root/
+├── app/                  # Application Core Logic
+│   ├── core/             # Settings, Security, Logger
+│   ├── routers/          # API Endpoints (Controller)
+│   ├── services/         # Business Logic
+│   ├── repositories/     # I/O Layer (DB, File, API)
+│   ├── models/           # Pydantic Schemas
+│   ├── ai/               # AI Engine (LLM, RAG, Graph)
+│   └── utils/            # Shared Utilities
 │
-├── app/
-│   ├── core/
-│   ├── routers/
-│   ├── services/
-│   ├── repositories/
-│   ├── models/
-│   ├── ai/
-│   └── utils/
+├── templates/            # Jinja2 HTML Templates
+│   ├── layout/           # Base Layouts
+│   ├── pages/            # Page Content
+│   └── partials/         # HTMX Components
 │
-├── templates/
-├── static/
+├── static/               # Static Assets (CSS, JS, Images)
+├── tests/                # Pytest Cases
+├── data/                 # (Optional) Local Data Storage
 │
-├── tests/
-│
-├── .env
-├── .env.example
-├── requirements.txt
-├── README.md
-├── Makefile
-└── main.py
+├── .env                  # Environment Variables (Git Ignored)
+├── .env.example          # Env Template
+├── requirements.txt      # Python Dependencies
+├── README.md             # Project Documentation
+├── Makefile              # Automation Scripts
+└── main.py               # App Entry Point
 ```
 
 ---
 
 ## 3. /app/core — Core Settings Layer
 
-Manages base system components like core settings, logger, and exception handling.
+Manages base system components such as core settings, logger, and exception handling.
 
 -   **Included Files**: `config.py`, `logger.py`, `exception_handlers.py`, `security.py`, etc.
 -   **Responsibilities**:
-    -   Loading environment variables.
-    -   Configuring a common logger.
-    -   Security/authentication policies.
-    -   Global FastAPI exception handling.
+    -   Loading environment variables
+    -   Common logger settings
+    -   Security/Authentication policies
+    -   FastAPI global exception handling
 
 ---
 
 ## 4. /app/routers — API Endpoint Layer
 
-Defines FastAPI endpoints.
+Defines FastAPI endpoints. Never includes business logic.
 
 -   **Rules**:
     -   Filename: `xxx_router.py`
     -   Router variable name: `router`
-    -   Role: `Request` → Call `Service` → Return `Response`
+    -   Role: Receive `Request` → Call `Service` → Return `Response`
 -   **Examples**: `chat_router.py`, `voice_router.py`, `health_router.py`
 
 ---
 
 ## 5. /app/services — Business Logic Layer
 
-Responsible for all business logic and workflow orchestration.
+Responsible for combining all business logic and workflows.
 
 -   **Rules**:
     -   Filename: `xxx_service.py`
-    -   Acts as an orchestrator between `Router` and `Repository`/`AI` layers.
-    -   Delegates external system call logic to the `Repository`.
+    -   Coordinator role between `Router` and `Repository`/`AI` layers
+    -   Delegates external system call logic to `Repository`
 -   **Examples**: `chat_service.py`, `voice_service.py`, `rag_service.py`
 
 ---
 
 ## 6. /app/repositories — IO (DB/File/API) Layer
 
-Handles all IO, including DB, file system, external APIs, and vector DBs.
+Handles all IO such as DB, file system, external API, Vector DB.
 
 -   **Rules**:
     -   Filename: `xxx_repository.py`
-    -   Maintain a pure function style as much as possible.
-    -   No business logic.
+    -   Maintain pure function form as much as possible
+    -   Prohibit inclusion of business logic
 -   **Examples**: `document_repository.py`, `vector_repository.py`, `user_repository.py`
 
 ---
@@ -109,37 +111,36 @@ Defines Pydantic models used for `Request`/`Response`/`DTO`.
 
 -   **Rules**:
     -   Filename: `xxx_model.py`
-    -   Prohibit inclusion of business logic.
+    -   Prohibit inclusion of business logic
 -   **Examples**: `chat_model.py`, `voice_model.py`, `rag_model.py`
 
 ---
 
 ## 8. /app/ai — LLM, RAG, LangGraph Engine Layer
 
-An area responsible for all AI-related components.
+Area responsible for all AI-related components.
 
--   **Recommended Sub-structure**:
+-   **Recommended Detailed Structure**:
     ```
     /app/ai/
-      ├── graph.py
-      ├── llm_client.py
-      ├── ingest/
-      ├── chunk/
-      ├── embed/
-      ├── retriever/
-      ├── reranker/
-      ├── generator/
-      ├── postprocess/
-      ├── stt/
-      └── tts/
+    ├── graph.py              # LangGraph Main Workflow
+    ├── llm_client.py         # LLM Client Wrapper (API/Local)
+    ├── ingest/               # Document Loading Logic
+    ├── chunk/                # Text Splitter Logic
+    ├── embed/                # Embedding Model Logic
+    ├── retriever/            # Vector DB Search Logic
+    ├── reranker/             # Re-ranking Logic
+    ├── generator/            # Prompt & Generation Logic
+    ├── stt/                  # Speech-to-Text Logic
+    └── tts/                  # Text-to-Speech Logic
     ```
--   **Roles**: LangGraph pipelines, LLM calls, RAG components, voice processing (STT/TTS).
+-   **Roles**: LangGraph pipeline, LLM calls, RAG components, Voice processing (STT/TTS)
 
 ---
 
 ## 9. /app/utils — Common Utility Functions
 
-Handles small pure functions, common logic, format conversions, string processing, etc.
+Responsible for small pure functions, common logic, format conversion, string processing, etc.
 
 -   **Examples**: `string_utils.py`, `time_utils.py`, `file_utils.py`
 
@@ -149,59 +150,59 @@ Handles small pure functions, common logic, format conversions, string processin
 
 Manages UI templates based on HTMX and Tailwind.
 
--   **Standard Structure**:
+-   **Structure Standard**:
     ```
     /templates/
-      ├── layout/ (base.html, header.html, footer.html)
-      ├── pages/ (index.html, chat.html, voice_chat.html)
-      └── partials/ (chat_message.html, loader.html, error.html)
+    ├── layout/               # base.html, header.html, footer.html
+    ├── pages/                # index.html, chat.html, voice_chat.html
+    └── partials/             # chat_message.html, loader.html
     ```
 
 ---
 
 ## 11. /static — CSS, JS, Assets
 
-Stores compiled CSS, JS, images, audio files, etc.
+Stores static resources such as compiled CSS, JS, images, audio files.
 
--   **Example Configuration**:
+-   **Configuration Example**:
     ```
     /static/
-      ├── css/ (tailwind.css)
-      ├── js/ (main.js)
-      ├── img/
-      └── tts/
+    ├── css/                  # tailwind.css (Compiled)
+    ├── js/                   # main.js (HTMX Extensions)
+    ├── img/                  # Images
+    └── tts/                  # Generated Audio Files (Temp)
     ```
 
 ---
 
 ## 12. /tests — Test Directory
 
-Stores `pytest`-based test code.
+Stores `pytest`-based test codes.
 
 -   **Rules**:
     -   Filename: `test_xxx.py`
-    -   Unit tests and integration tests can be separated.
+    -   Can be configured by separating unit tests and integration tests
 
 ---
 
 ## 13. Top-Level Files
 
--   `.env` / `.env.example`: Environment variable files.
--   `requirements.txt`: Python dependency list.
--   `Makefile`: Scripts for run/test/deploy.
--   `README.md`: Project overview and guide.
--   `main.py`: FastAPI application entry point.
+-   `.env` / `.env.example`: Environment variable files (API Key, DB URL, etc.)
+-   `requirements.txt`: List of Python dependency packages
+-   `Makefile`: Execution/Test/Deployment scripts
+-   `README.md`: Project overview and guide
+-   `main.py`: FastAPI app execution entry point (uvicorn.run)
 
 ---
 
-## 14. Inter-Layer Dependency Rules
+## 14. Dependency Rules Between Layers
 
-Dependencies should always flow from the outside in.
+Dependencies must always point from outside to inside.
 
 -   **Allowed**:
     -   `routers` → `services`
     -   `services` → `repositories` / `ai`
--   **Globally Usable**: `core`, `utils`, `models`
+-   **Globally Available**: `core`, `utils`, `models`
 -   **Prohibited**: Reverse dependencies (e.g., `repositories` → `services`)
 
 ---
@@ -228,28 +229,28 @@ For large-scale projects, it is recommended to separate modules by functional do
 
 ---
 
-## 16. Paju City · Public Project Specific Structure
+## 16. Data Pipeline Structure (Universal)
 
-For public document projects, a `data/` folder can be included to manage original and processed data.
+Standard data folder for RAG/Document processing projects can include a `data/` folder to manage raw data and processed data.
 
 ```
 project-root/
   ├── data/
-  │   ├── raw/        # Original PDF/documents
-  │   ├── cleaned/    # Preprocessed text
-  │   ├── chunks/     # Chunk storage
-  │   └── embeddings/ # Vector index
+  │   ├── raw/        # Raw PDF/Documents
+  │   ├── cleaned/    # Preprocessed Text
+  │   ├── chunks/     # Chunk Storage
+  │   └── embeddings/ # Vector Index
   └── ...
 ```
 
 ---
 
-## 17. Folder Management Principles in Operations & Deployment
+## 17. Folder Management Principles in Operations/Deployment
 
--   Maintain the same folder structure across all environments (`local`, `staging`, `prod`).
--   Apply versioning rules to `data`, `embedding`, and `TTS` files.
--   Periodically clean up old temporary files, logs, and TTS voice files.
--   Never include the `.env` file in version control (Git).
+-   All environments (`local`, `staging`, `prod`) maintain the same folder structure.
+-   `data`, `embedding`, `TTS` files, etc., are managed by applying version rules.
+-   Old temporary files, logs, and TTS voice files are cleaned up periodically.
+-   `.env` files are never included in the version control system (Git).
 
 ---
 

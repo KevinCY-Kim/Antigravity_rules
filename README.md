@@ -1,4 +1,4 @@
-# KevinCY-Kodex: AI Engineering Standard & Playbook
+# KevinCY-Antigravity : AI Engineering Standard & Playbook
 
 **Version:** 2025.11.27 (Universal Hybrid Edition)
 **Author:** KevinCY-Kim (System Architect)
@@ -8,7 +8,7 @@
 
 ## 1. 소개 (Introduction)
 
-`KevinCY-Kodex`는 확장 가능한 AI 애플리케이션(RAG, Voice Bot)을 구축하기 위해 설계된 **Unified Engineering Standard(통합 엔지니어링 표준)**입니다.
+`KevinCY-Antigravity`는 확장 가능한 AI 애플리케이션(RAG, Voice Bot)을 구축하기 위해 설계된 **Unified Engineering Standard(통합 엔지니어링 표준)**입니다.
 **Clean Architecture**, **Hybrid AI Strategy**, **Agent Safety**를 기반으로, 기획부터 배포까지의 개발 프로세스를 체계화한 플레이북을 제공합니다.
 
 이 문서는 **개발팀**뿐만 아니라, **AI 에이전트(Antigravity)**가 프로젝트 컨텍스트를 이해하고 일관성 있는 코드를 작성하기 위한 **핵심 지침서(Root Instruction)** 역할을 합니다.
@@ -82,7 +82,7 @@
 
 ## 6. 저작권 및 라이선스 (License)
 
-`KevinCY-Kodex`는 지식의 공유와 발전을 지향합니다.
+`KevinCY-Antigravity`는 지식의 공유와 발전을 지향합니다.
 
 -   **Documentation (CC BY 4.0):** 저작자 표시(KevinCY-Kim) 하에 자유로운 수정 및 배포 가능.
 -   **Code Samples (MIT License):** 상업적 이용을 포함한 제한 없는 코드 사용 허용.

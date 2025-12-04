@@ -1,103 +1,115 @@
 # KevinCY-Kodex — Testing Strategy
-
-**Version:** 2025.11  
-**Scope:** FastAPI · AI/RAG · Clean Architecture
+**Version:** 2025.11.27 (Universal Standard)
+**Scope:** FastAPI · AI/RAG · Clean Architecture · Pytest (Async)
 
 ---
 
 ## 1. Testing Philosophy
 
-The testing philosophy of `KevinCY-Kodex` is **"to continuously deliver reliable code."** All code must prove its quality through tests.
+The testing philosophy of `KevinCY-Kodex` is **"Continuously delivering reliable code"**. All code must prove its quality through tests.
 
--   **Quality Assurance**: Guarantees that new features work as intended.
--   **Regression Prevention**: Prevents existing features from breaking due to code changes.
--   **Confident Refactoring**: Allows for confident code structure improvements, as tests act as a safety net.
--   **Living Documentation**: Well-written test code serves as a specification for the feature itself.
+-   **Quality Assurance**: Guarantee that new features work as intended.
+-   **Regression Prevention**: Prevent existing features from being damaged by code changes.
+-   **Confident Refactoring**: Tests act as a safety net, allowing code structure improvement with confidence.
+-   **Living Documentation**: Well-written test code serves as a specification of the feature itself.
 
 ---
 
 ## 2. Test Types and Scope
 
-The project manages quality centered around three types of tests.
+The project manages quality centering on three types of tests.
 
 1.  **Unit Test**
-    -   **Scope**: A single function, method, or class.
-    -   **Characteristics**: All external dependencies (DB, APIs, AI models, etc.) are **mocked**. Runs in a very fast and isolated environment.
-    -   **Goal**: To verify the correctness of the logic.
+    -   **Scope**: Single function, method, or class.
+    -   **Characteristics**: All external dependencies (DB, API, AI Model, etc.) are **Mocked**. Runs in a very fast and isolated environment.
+    -   **Goal**: Verification of logic correctness.
 
 2.  **Integration Test**
-    -   **Scope**: Tests the interaction of two or more layers. (e.g., `Service` + `Repository`).
-    -   **Characteristics**: May include interaction with a real DB (a test DB) or external systems. Slower than unit tests.
-    -   **Goal**: To verify the interaction and data flow between layers.
+    -   **Scope**: Testing two or more layers working together. (e.g., `Service` + `Repository`)
+    -   **Characteristics**: May include some integration with actual DB (for testing) or external systems. Slower than unit tests.
+    -   **Goal**: Verification of interaction and data flow between layers.
 
 3.  **E2E Test (End-to-End Test)**
-    -   **Scope**: Tests the entire flow from an API endpoint request to the response, identical to a real user scenario.
-    -   **Characteristics**: The slowest, but provides the most certain guarantee of the entire system's operation.
-    -   **Goal**: To verify the stability of the entire system and its behavior from the end-user's perspective.
+    -   **Scope**: Testing the entire flow from API endpoint request to response, identical to actual user scenarios.
+    -   **Characteristics**: Slowest, but most certainly guarantees the operation of the entire system.
+    -   **Goal**: Verification of system stability and operation from the end-user perspective.
 
 ---
 
 ## 3. Layer-by-Layer Strategy
 
-Each layer of the Clean Architecture is tested according to the following strategy.
+Each layer of Clean Architecture is tested according to the following strategies.
 
 ### 3.1 `/app/routers`
 -   **Test Targets**:
-    -   Does it return a `200 OK` status code for a valid request?
-    -   Does it return `422 Unprocessable Entity` for an invalid request (validation failure)?
-    -   Is the `RequestModel` correctly passed to the `Service` layer?
-    -   Is the return value from the `Service` correctly formatted into the `ResponseModel`?
--   **Tool**: FastAPI's `TestClient`
+    -   Does it return `200 OK` status code for normal requests?
+    -   Does it return `422 Unprocessable Entity` for invalid requests (validation failure)?
+    -   Is `RequestModel` correctly passed to the `Service` layer?
+    -   Is the return value of `Service` returned according to `ResponseModel` format?
+-   **Tools**: FastAPI's `TestClient`
 
-### 3.2 `/app/services`
+### 3.2 `/app/services` (Async Logic)
 -   **Test Targets**:
-    -   All branches of the core business logic (if/else, etc.).
-    -   Does it call functions from `Repository` or `AI` modules with the correct arguments?
-    -   Does it behave correctly based on the return values from external layers?
-    -   Does it handle exceptions correctly?
--   **Tool**: `pytest`, `pytest-mock` (for mocking external layers)
+    -   All branches of core business logic (if/else, etc.).
+    -   **Hybrid Fallback**: Does logic switching to Local LLM work upon API call failure?
+    -   Does it call functions of `Repository` or `AI` modules with correct arguments?
+    -   Does it correctly handle exceptions?
+-   **Tools**: `pytest`, `pytest-mock`, `pytest-asyncio` (For async function testing)
 
 ### 3.3 `/app/repositories`
 -   **Test Targets**:
     -   Are DB queries correctly written and executed?
-    -   Does it make requests to external APIs with the correct endpoint and parameters?
-    -   Does it correctly transform responses from the DB or API into the right data objects?
--   **Tool**: `pytest`, `pytest-mock`, `httpx` (for mocking external APIs), test DB session
+    -   Does it request with correct endpoints and parameters when calling external APIs?
+    -   Does it convert DB or API responses into correct data objects?
+-   **Tools**: `pytest`, `pytest-mock`, `httpx` (For external API mocking), Test DB Session
 
 ---
 
 ## 4. AI Pipeline Testing Strategy
 
-Considering the non-deterministic nature of AI models, we focus on testing the **structure and format** of the output, not the content itself.
+Considering the non-deterministic nature of AI models, focus on testing the **structure and format** rather than the **content** of the results.
+*(Quality evaluation follows Evaluation Rules in `RAG.md`.)*
 
 ### 4.1 RAG Retrieval Test
--   **Goal**: To verify that for a specific question, the intended core document (Chunk) is included in the top N search results.
--   **Method**: Create predefined pairs of "question-to-required-chunk-ID". After running the `retriever` function, use an `assert` statement to check if the required chunk is present in the results.
+-   **Goal**: Verify if intended core documents (Chunks) are included in the top N search results for a specific question.
+-   **Method**: Create predefined "Question-Mandatory Chunk ID" pairs, and check if mandatory chunks are included in the result after running `retriever` function using `assert` statements.
 
-### 4.2 LLM Response Generation Test
--   **Goal**: To verify the **format** of the answer generated by the LLM. (The truthfulness of the content is difficult to test).
+### 4.2 LLM Response Generation Test (Hybrid Strategy)
+-   **Goal**: Verify the **Format** and **Fallback Logic** of answers generated by LLM.
 -   **Method**:
-    -   Mock the LLM call to return a predefined text.
-    -   Verify that the answer generation function takes this text and returns a valid JSON structure, including required keys (`answer`, `sources`, etc.).
+    -   **Mocking**: Mock `SKT A.X` and `Ollama` clients respectively to return fixed dummy text.
+    -   **Structure Check**: Verify if the answer generation function receives this dummy text and finally returns a valid JSON structure (`answer`, `sources`).
 
 ---
 
 ## 5. Test Environment & Tools
 
 -   **Test Runner**: `pytest`
+-   **Async Plugin**: `pytest-asyncio` (Mandatory for FastAPI/LangGraph async testing)
 -   **Mocking Library**: `pytest-mock`
--   **HTTP Client (for API tests)**: `TestClient` (from `fastapi.testclient`)
--   **HTTP Client (for mocking external APIs)**: `httpx`
+-   **HTTP Client (For API Testing)**: `TestClient` (from `fastapi.testclient`)
+-   **HTTP Client (For External API Mocking)**: `httpx`
 
 ---
 
 ## 6. Test Execution Rules
 
-1.  All new feature additions and bug fixes must include corresponding test code.
-2.  Before merging code into the `main` branch, all tests (`unit`, `integration`) must pass. (Enforced by CI).
-3.  Test code must also adhere to all rules in `Code_Style_eng.md`.
-4.  It is recommended to maintain a target test coverage of **80% or higher**.
+1.  All new feature additions and bug fixes must include relevant test codes.
+2.  All tests (`unit`, `integration`) must pass before merging code into the `main` branch.
+3.  Test codes must also comply with all rules (Naming, Type Hint) in `Code_Style.md`.
+4.  It is recommended to maintain target test coverage of **over 80%**.
 
 ---
+
+## 7. Agent Protocol (Antigravity Guide)
+*Rules for agents to follow when performing tests in the terminal.*
+
+1.  **Command:** Use the following commands when running tests.
+    -   All tests: `pytest`
+    -   Include detailed logs: `pytest -v`
+    -   Specific file only: `pytest tests/test_chat_service.py`
+2.  **Safety First:**
+    -   Before running tests, check if `.env` file points to **Test Environment** settings (e.g., `TEST_DB_URL`).
+    -   **Never run tests while connected to Production DB.**
 
 End of KevinCY-Kodex Testing Strategy

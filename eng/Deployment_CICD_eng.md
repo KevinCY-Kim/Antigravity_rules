@@ -1,13 +1,13 @@
 # KevinCY-Kodex — Deployment & CI/CD Guideline
 
-**Version:** 2025.11  
-**Scope:** FastAPI · Docker · GitHub Actions
+**Version:** 2025.11.27 (Universal Standard)
+**Scope:** FastAPI · Docker (CPU/GPU) · GitHub Actions · Model Ops
 
 ---
 
 ## 1. CI/CD Pipeline Overview
 
-The CI/CD pipeline for `KevinCY-Kodex` aims to deliver code changes to users in a stable and automated manner.
+The goal of the `KevinCY-Kodex` CI/CD pipeline is to deliver code changes to users in a stable and automated manner.
 
 **Overall Flow**:
 `Git Push` (feature branch) → `Pull Request` → **[CI]** Run `Lint & Test` → `Code Review` & `Merge` (main branch) → **[CD]** `Docker Build & Push` → `Deploy` (staging/production)
@@ -16,26 +16,27 @@ The CI/CD pipeline for `KevinCY-Kodex` aims to deliver code changes to users in 
 
 ## 2. Branching Strategy
 
-Follows a simplified version of **Git-Flow**.
+We follow a simplified version of **Git-Flow**.
 
--   `main`: The main branch that is always in a deployable state.
--   `develop`: A branch where features under development for the next release are integrated (optional).
--   `feature/<feature-name>`: A branch for developing new features. Branched from `main` or `develop`.
--   `fix/<bug-name>`: A branch for fixing bugs.
+-   `main`: Main branch that is always in a deployable state.
+-   `develop`: Branch where features being developed for the next release are integrated (Optional).
+-   `feature/<feature-name>`: Branch for developing new features. Branches off from `main` or `develop`.
+-   `fix/<bug-name>`: Branch for fixing bugs.
 
-All work starts from a `feature` or `fix` branch and is merged into the `main` branch via a `Pull Request`.
+All work starts in `feature` or `fix` branches and is merged into the `main` branch via `Pull Request`.
 
 ---
 
 ## 3. CI (Continuous Integration)
 
-Builds the CI pipeline using **GitHub Actions**.
+We build the CI pipeline using **GitHub Actions**.
 
--   **Trigger**: On `push` or `pull_request` events to the `main` branch.
+-   **Trigger**: When `push` or `pull_request` events occur on the `main` branch.
 -   **Key Jobs**:
-    1.  **Linting**: Checks code style using `ruff` or `flake8`.
-    2.  **Testing**: Runs `pytest` to ensure all tests pass.
--   **Goal**: To guarantee that all code merged into the `main` branch meets minimum quality standards.
+    1.  **System Dependencies**: First install system packages required for voice/AI processing (e.g., `ffmpeg`, `build-essential`).
+    2.  **Linting**: Check code style using `ruff` or `flake8`.
+    3.  **Testing**: Run `pytest` to ensure all tests pass (Comply with `Testing_Strategy.md`).
+-   **Goal**: Guarantee that all code merged into the `main` branch has passed minimum quality standards.
 
 **Example Workflow (`.github/workflows/ci.yml`)**:
 ```yaml
@@ -56,6 +57,10 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.11'
+    - name: Install System Deps (Audio/AI)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -66,32 +71,38 @@ jobs:
         ruff check .
     - name: Test with pytest
       run: |
-        pip install pytest
+        pip install pytest pytest-asyncio pytest-mock httpx
         pytest
 ```
 
 ---
 
-## 4. Dockerization Strategy
+## 4. Dockerization Strategy (AI Optimized)
 
--   **`Dockerfile` Standard**:
-    -   **Base Image**: Use the official `python:3.11-slim` image.
-    -   **Multi-stage Builds**: Separate dependency installation from the actual execution environment to minimize the final image size.
-    -   **Non-root User Execution**: Run the application as a non-root user, such as `appuser`, for security.
--   **`.dockerignore`**: Configure to prevent unnecessary files like `.git`, `__pycache__`, and `.env` from being included in the image.
+-   **`Dockerfile` Standards**:
+    -   **Base Image Strategy**:
+        -   **CPU Mode (API/Web):** `python:3.11-slim` (Prioritize lightweight)
+        -   **GPU Mode (Local LLM/Whisper):** `nvidia/cuda:12.x.x-base-ubuntu22.04` (CUDA support mandatory)
+    -   **System Dependencies**: Must include `ffmpeg` package installation for `Voice_Pipeline` processing.
+    -   **Multi-stage Build**: Minimize final image size by separating build tools (`gcc`, etc.) and execution environment.
+    -   **Non-root User**: Create an `appuser` account to run the application for security.
+-   **Model Weights Handling (Important)**:
+    -   **Never include LLM/Embedding model files reaching several GBs in the Docker image.**
+    -   Connect the host's model folder via **Volume Mount** at runtime, or download from S3/Cloud Storage in the container startup script.
+-   **`.dockerignore`**: Must exclude unnecessary or temporary files like `.git`, `__pycache__`, `.env`, `data/`, `static/tts/`.
 
 ---
 
 ## 5. CD (Continuous Deployment)
 
-Builds the CD pipeline using **GitHub Actions**.
+We build the CD pipeline using **GitHub Actions**.
 
 -   **Staging Environment**:
-    -   **Trigger**: Deploys automatically whenever there is a `push` to the `main` branch.
-    -   **Process**: Builds a Docker image, pushes it to a container registry (e.g., Docker Hub, GHCR), and then deploys the latest image to the `staging` server.
+    -   **Trigger**: Automatically deployed whenever there is a `push` to the `main` branch.
+    -   **Process**: Docker Image Build & Push (Registry) → `docker pull` & Service Restart on Staging Server.
 -   **Production Environment**:
-    -   **Trigger**: Deploys on **manual execution** or when a **Git Tag** is created (e.g., `v1.0.0`).
-    -   **Process**: Deploys a specific version of the Docker image, verified in `staging`, to the `production` server.
+    -   **Trigger**: Deployed upon **Manual Execution (workflow_dispatch)** or **Git Tag** creation. (e.g., `v1.0.0`)
+    -   **Process**: Deploy a verified specific version of Docker image, recommending **Rolling Update** strategy to minimize service downtime.
 
 ---
 
@@ -99,19 +110,26 @@ Builds the CD pipeline using **GitHub Actions**.
 
 Never include sensitive information like API keys or DB connection info in the code.
 
--   **Local Environment**: Use `.env` files, which are added to `.gitignore` to be excluded from version control.
--   **CI/CD Environment**: Use **GitHub Secrets** to inject them as environment variables within the workflow.
+-   **Local Environment**: Use `.env` file, and add this file to `.gitignore` to exclude it from version control.
+-   **CI/CD Environment**: Inject as environment variables within the workflow (`yaml`) using **GitHub Secrets**.
 -   **Deployment Environment (Staging/Production)**:
-    -   Set directly as server environment variables.
-    -   Recommended to use a cloud provider's Secret Manager service (e.g., AWS Secrets Manager, GCP Secret Manager).
+    -   Set as system environment variables on the server, or load a `.env` file from a secured path at deployment time.
+    -   Recommend using **Secret Manager** services from cloud providers if possible.
 
 ---
 
 ## 7. Monitoring & Rollback
 
--   **Monitoring**: Continuously monitor the application's status (error rate, response time, etc.) after deployment. (Refer to the logging/monitoring rules in `Architecture_eng.md`)
--   **Rollback**: A procedure must be in place to quickly roll back to a previous stable Docker image version if a serious problem occurs after deployment.
+-   **Monitoring**: Continuously monitor application status (Error Rate, Latency, CPU/GPU Usage) after deployment. (Refer to logging rules in `Architecture.md` and `Voice_Pipeline.md`)
+-   **Rollback**: Prepare a **Revert Script** in advance to immediately revert to the previous Docker tag version (e.g., `v1.0.0` -> `v0.9.9`) in case of critical issues after deployment.
 
 ---
+
+## 8. Agent Protocol (Antigravity Deployment Guardrails)
+*Absolute rules for agents to follow when writing deployment-related scripts (Dockerfile, YAML).*
+
+1.  **No Hardcoding:** Do not hardcode API Keys or Passwords as text inside scripts. Must use `${ENV_VAR}` format.
+2.  **Volume Check:** When configuring deployment, ensure `data/` (Vector DB) and `static/` (TTS files) folders are connected to **Persistent Storage (Volume)**. (Prevent data loss upon container restart)
+3.  **Dry Run:** Before executing deployment commands, show the target server and version to the user and request approval.
 
 End of KevinCY-Kodex Deployment & CI/CD Guideline

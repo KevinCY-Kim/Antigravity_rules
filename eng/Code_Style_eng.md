@@ -1,26 +1,27 @@
 # KevinCY-Kodex — Code Style Guide
 
-**Version:** 2025.11  
+**Version:** 2025.11
 **Scope:** Python · FastAPI · LangGraph · RAG · HTMX · Tailwind
 
 ---
 
 ## 1. General Coding Principles
 
--   Apply **100% `type hints`** to all code.
--   Functions must adhere to the **Single Responsibility Principle (SRP)**.
--   Use meaning-based naming for variables, functions, and files.
--   Prohibit magic numbers/strings (hard-coded values) → separate them into `settings`/`config`/constants.
--   Business logic flow: `routers` → `services` → `repositories`/`ai`.
--   Minimize side effects (aim for pure functions where possible).
+-   Apply **`type hint` 100%** to all code
+-   Functions must adhere to **Single Responsibility Principle (SRP)**
+-   **Async First:** All DB, API, File I/O operations must use `async def` / `await` pattern
+-   Name variables, functions, and files based on meaning
+-   No magic numbers/strings (hard-coded values) → Separate into `settings`/`config`/constants
+-   Business logic flow: `routers` → `services` → `repositories`/`ai`
+-   Minimize side effects (Aim for pure functions if possible)
 
 ---
 
 ## 2. Python Code Style
 
-### 2.1 Naming Conventions
+### 2.1 Naming Rules
 
-| Target | Convention | Example |
+| Target | Rule | Example |
 | :--- | :--- | :--- |
 | Variable | `snake_case` | `user_id`, `file_path` |
 | Function | `snake_case` | `load_document()`, `run_rag()` |
@@ -30,33 +31,33 @@
 
 ### 2.2 Formatting
 
--   Based on **PEP8**, with 4-space indentation.
--   Maximum line length: **100-120 characters** (wrap if exceeded).
--   **`import` order**:
-    1.  Standard library
-    2.  Third-party libraries
-    3.  Local modules
+-   Based on **PEP8**, 4-space indentation
+-   Max line length: **100~120 characters** (Wrap if exceeded)
+-   **`import` Order**:
+    1.  Standard Library
+    2.  Third-party Library
+    3.  Local Module
     ```python
-    # 1. Standard library
+    # 1. Standard Library
     import json
     import os
     from pathlib import Path
     
-    # 2. Third-party libraries
+    # 2. Third-party Library
     import numpy as np
     from fastapi import APIRouter
     
-    # 3. Local modules
+    # 3. Local Module
     from app.core.config import settings
     from app.services.chat_service import handle_chat
     ```
--   Prohibit `from x import *`.
--   Remove unused `imports` and variables.
--   Minimize `try/except` blocks and specify concrete exception types.
+-   Do not use `from x import *`
+-   Remove unused `import`s and variables
+-   Minimize `try/except` and specify concrete exception types
 
 ### 2.3 Docstring Style
 
--   Use a simple summary + `Args`/`Returns` format for public functions/methods.
+-   Public functions/methods use a simple summary and `Args`/`Returns` format.
     ```python
     from pathlib import Path
 
@@ -65,10 +66,10 @@
         Loads text from the given file path.
     
         Args:
-            path: The path to the text file.
+            path: Text file path.
     
         Returns:
-            The entire text string read from the file.
+            Full text string read from the file.
         """
     ```
 
@@ -79,7 +80,7 @@
 ### 3.1 Router File Rules
 
 -   **Filename**: `xxx_router.py` (e.g., `chat_router.py`, `voice_router.py`)
--   **Router instance name**: Always `router`.
+-   **Router Instance Name**: Always `router`
     ```python
     from fastapi import APIRouter
     
@@ -88,22 +89,21 @@
 
 ### 3.2 Router Internal Principles
 
--   The Router is responsible for **input/output only** and does not contain business logic.
--   Follows the flow: `RequestModel` → `Service` call → `ResponseModel` return.
+-   Router is **only responsible for I/O** and does not include business logic.
+-   Follows the flow: `RequestModel` → Call `Service` → Return `ResponseModel`.
     ```python
     from app.models.chat_model import ChatRequest, ChatResponse
     from app.services.chat_service import handle_chat
     
     @router.post("/", response_model=ChatResponse)
     async def chat(request: ChatRequest) -> ChatResponse:
-        # This is where the business logic is called.
         return await handle_chat(request)
     ```
 
 ### 3.3 Response Rules
 
 -   Use Pydantic models for return types whenever possible.
--   Minimize returning `dict` directly; define a model and use it if necessary.
+-   Minimize direct `dict` returns and define models if necessary.
 
 ---
 
@@ -112,8 +112,8 @@
 ### 4.1 Basic Rules
 
 -   **Filename**: `xxx_model.py`
--   **Class name**: `PascalCase`
--   Mainly used for I/O DTOs; do not include business logic.
+-   **Class Name**: `PascalCase`
+-   Mainly used for I/O DTOs, does not include business logic.
     ```python
     from pydantic import BaseModel
     
@@ -133,18 +133,18 @@
 ### 5.1 Rules
 
 -   **Filename**: `xxx_service.py`
--   **Role**: Combination of business logic + workflow.
--   **Key Responsibilities**:
-    -   Input validation (if additional validation is needed).
-    -   Orchestration of multiple `repository`/`ai` calls.
-    -   Exception handling and logging.
--   Maintain a structure where service functions are called directly from the Router.
+-   **Role**: Combination of business logic and workflow
+-   **Main Responsibilities**:
+    -   Input validation (if needed)
+    -   Combination of multiple `repository`/`ai` calls
+    -   Exception handling and logging
+-   Maintain a structure where Router calls Service functions directly.
     ```python
     from app.models.chat_model import ChatRequest, ChatResponse
     from app.ai.graph import run_chat_graph
     
     async def handle_chat(request: ChatRequest) -> ChatResponse:
-        """Entry point for the service layer to handle chat requests."""
+        """Entry point for service layer handling chat requests."""
         state = {"query": request.query, "user_id": request.user_id}
         result = await run_chat_graph(state)
         return ChatResponse(answer=result["answer"], sources=result.get("sources"))
@@ -157,16 +157,16 @@
 ### 6.1 Rules
 
 -   **Filename**: `xxx_repository.py`
--   **Responsibility**: Dedicated to **IO** such as DB, files, Vector DB, external APIs.
--   Write as pure functions where possible, and do not include business rules.
--   Only perform roles like saving/retrieving/searching.
+-   **Responsibility**: **Dedicated to IO** such as DB, File, Vector DB, External API
+-   Write as pure functions whenever possible, do not include business rules.
+-   Perform only roles like save/retrieve/search.
     ```python
     from typing import Sequence
     from app.models.chunk_model import Chunk
-    
-    def load_chunks(document_id: str) -> Sequence[Chunk]:
-        """Loads a list of chunks corresponding to the document ID."""
-        # ... DB or file system logic ...
+
+    async def load_chunks(document_id: str) -> Sequence[Chunk]:
+        """Asynchronously loads the list of chunks corresponding to the document ID."""
+        # ... DB or File System Logic ...
         pass
     ```
 
@@ -176,12 +176,12 @@
 
 ### 7.1 Folder Structure
 
-The folder structure for AI and LangGraph related modules follows the project-wide standard.
-> For a detailed AI-related folder structure, please refer to the `Folder_Standards_eng.md` document.
+AI and LangGraph related folder structure follows the project-wide standard.
+> Refer to `Folder_Standards.md` for detailed AI-related folder structure.
 
 ### 7.2 LangGraph Node Function Style
 
--   All nodes maintain the `state: dict -> dict` format.
+-   All nodes maintain the `state: dict -> dict` form.
     ```python
     async def retrieval_node(state: dict) -> dict:
         query: str = state["query"]
@@ -189,22 +189,25 @@ The folder structure for AI and LangGraph related modules follows the project-wi
         return {**state, "retrieved_docs": docs}
     ```
 
-### 7.3 LLM Call Style
+### 7.3 LLM Call Style (Comply with Hybrid Config)
 
-```python
-async def generate_answer(context: str, question: str) -> str:
-    prompt = f"""
-You are an expert who answers based on official documents.
-You must answer based on evidence, and if you don't know, say you don't know.
+-   Utilize environment variables like `AX_MODEL_NAME` defined in Master Rule.
+    ```python
+    from app.core.config import settings
 
-[Context]
-{context}
-
-[Question]
-{question}
-"""
-    return await llm_client.chat(prompt)
-```
+    async def generate_answer(context: str, question: str) -> str:
+        prompt = f"""
+        [Rule] Answer based on evidence, say you don't know if you don't know.
+        [Context] {context}
+        [Question] {question}
+        """
+        # Call SKT A.X or Ollama (Depending on settings)
+        return await llm_client.chat(
+            model=settings.AX_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=settings.AX_TEMPERATURE
+        )
+    ```
 
 ---
 
@@ -212,37 +215,37 @@ You must answer based on evidence, and if you don't know, say you don't know.
 
 ### 8.1 Chunking
 
--   **Default settings**: `chunk_size = 800`, `chunk_overlap = 200`
+-   **Default Settings**: `chunk_size = 800`, `chunk_overlap = 200`
     ```python
     def chunk_text(content: str, size: int = 800, overlap: int = 200) -> list[str]:
         chunks: list[str] = []
         start = 0
         length = len(content)
-    
+
         while start < length:
             end = min(start + size, length)
             chunk = content[start:end]
             chunks.append(chunk)
             start += size - overlap
-    
+
         return chunks
     ```
 
 ### 8.2 Retrieval
 
--   **Hybrid**: Combination of keyword (`BM25`) + vector search.
--   Separate `Rerank` into a dedicated function/module.
+-   **Hybrid**: Combination of Keyword (`BM25`) + Vector Search
+-   Separate `Rerank` into a separate function/module.
     ```python
-    def hybrid_search(query: str, k: int = 10) -> list[dict]:
-        keyword_docs = bm25_search(query, k=k)
-        vector_docs = dense_search(query, k=k)
+    async def hybrid_search(query: str, k: int = 10) -> list[dict]:
+        keyword_docs = await bm25_search(query, k=k)
+        vector_docs = await dense_search(query, k=k)
         merged = merge_results(keyword_docs, vector_docs)
-        return rerank(query, merged)
+        return await rerank(query, merged)
     ```
 
 ### 8.3 Answer Generation
 
--   Use structured output (JSON-like `dict`) whenever possible.
+-   Use structured output (JSON format `dict`) whenever possible.
     ```python
     def build_answer_payload(answer: str, sources: list[str]) -> dict:
         return {
@@ -257,7 +260,7 @@ You must answer based on evidence, and if you don't know, say you don't know.
 
 ### 9.1 Rules
 
--   Global FastAPI exception handlers are managed in `/app/core/exception_handlers.py`.
+-   FastAPI global exception handler is managed in `/app/core/exception_handlers.py`.
 -   Convert exceptions to appropriate `HTTPException` in the `Service` layer.
     ```python
     from fastapi import HTTPException, status
@@ -266,10 +269,10 @@ You must answer based on evidence, and if you don't know, say you don't know.
         if not document_exists(doc_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="The corresponding document could not be found.",
+                detail="The document could not be found.",
             )
     ```
--   Do not log sensitive information (e.g., social security numbers, API tokens).
+-   Do not record sensitive information (SSN, API Token, etc.) in logs.
 
 ---
 
@@ -285,7 +288,7 @@ You must answer based on evidence, and if you don't know, say you don't know.
         logger.info({
             "event": "chat_request",
             "user_id": user_id,
-            "query": query[:100],  # Consider sensitive info and length limits
+            "query": query[:100],  # Consider sensitive info and length limit
         })
     ```
 
@@ -295,8 +298,8 @@ You must answer based on evidence, and if you don't know, say you don't know.
 
 ### 11.1 Basic Principles
 
--   HTMX request paths should always use the `/api/*` namespace.
--   Explicitly use `hx-target`, `hx-swap`, and `hx-indicator`.
+-   HTMX request paths always use the `/api/*` namespace.
+-   Explicitly use `hx-target`, `hx-swap`, `hx-indicator`.
     ```html
     <form
       hx-post="/api/chat"
@@ -313,18 +316,18 @@ You must answer based on evidence, and if you don't know, say you don't know.
 
 ## 12. Tailwind Code Style
 
--   **Class order** should maintain the following group sequence:
+-   **Class Order** maintains the following group order:
     1.  Layout (`flex`, `grid`, etc.)
     2.  Alignment/Spacing (`items-center`, `gap`, `p`/`m`)
     3.  Typography (`text-sm`, `font-medium`)
     4.  Color/Background (`bg-white`)
-    5.  Other (`rounded-lg`, `shadow`, `transition`)
+    5.  Others (`rounded-lg`, `shadow`, `transition`)
     ```html
-    <div class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-900 bg-white rounded-lg shadow">
+    <div class="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white rounded-lg shadow">
       ...
     </div>
     ```
--   Prioritize using the Tailwind default palette over meaningless custom colors.
+-   Prioritize using Tailwind default palette over meaningless custom colors.
 
 ---
 
@@ -336,7 +339,7 @@ You must answer based on evidence, and if you don't know, say you don't know.
 | Service | `chat_service.py` |
 | Repository | `chat_repository.py` |
 | Model | `chat_model.py` |
-| Utility | `string_utils.py` |
+| Util | `string_utils.py` |
 | AI Module | `retriever.py` |
 | Test Code | `test_chat_service.py` |
 
@@ -347,7 +350,7 @@ You must answer based on evidence, and if you don't know, say you don't know.
 ### 14.1 Rules
 
 -   **Filename**: `test_xxx.py`
--   **Test function name**: Use `test_` prefix.
+-   **Test Function Name**: Use `test_` prefix
 -   **Given–When–Then** pattern is recommended.
     ```python
     import pytest
@@ -372,11 +375,11 @@ You must answer based on evidence, and if you don't know, say you don't know.
 ## 15. Git Commit Message Style
 
 -   Use English-based `prefix`.
-    -   `feat`: Add a new feature (e.g., `feat: add voice chat STT pipeline`)
-    -   `fix`: Fix a bug (e.g., `fix: handle empty query in chat service`)
-    -   `refactor`: Refactor code (e.g., `refactor: simplify rag retrieval flow`)
-    -   `docs`: Modify documentation (e.g., `docs: update architecture and code-style`)
-    -   `chore`: Other changes like build, dependencies (e.g., `chore: bump dependency versions`)
+    -   `feat`: Add new feature (e.g., `feat: add voice chat STT pipeline`)
+    -   `fix`: Fix bug (e.g., `fix: handle empty query in chat service`)
+    -   `refactor`: Code refactoring (e.g., `refactor: simplify rag retrieval flow`)
+    -   `docs`: Update documentation (e.g., `docs: update architecture and code-style`)
+    -   `chore`: Build, dependency, etc. changes (e.g., `chore: bump dependency versions`)
 
 ---
 

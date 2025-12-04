@@ -1,115 +1,106 @@
 # KevinCY-Kodex — Architecture Guideline
-Version: 2025.11  
-Scope: FastAPI + LangGraph + RAG + STT/TTS + Web Frontend
+**Version:** 2025.11.27 (Universal Standard)
+**Scope:** FastAPI + LangGraph + RAG + STT/TTS + Web Frontend
+**Reference:** This document is a detailed technical sub-document of `KevinCY-Kodex (Master Rule)`.
 
 ---
 
 ## 1. System Overview
 
-This system consists of the following main subsystems.
+This system aims for a 'Hybrid AI Service' and consists of the following subsystems:
 
--   **API Backend**: FastAPI
--   **AI Engine**: LangGraph + LLM + RAG
--   **Voice Pipeline**: STT/TTS
--   **Web Frontend**: HTMX + Tailwind + Jinja2
--   **Infra & Ops**: Deployment, Monitoring, Environment Management
+-   **API Backend**: FastAPI (Clean Architecture)
+-   **AI Engine**: LangGraph Orchestration + Hybrid LLM (SKT A.X / Ollama)
+-   **Voice Pipeline**: STT (Whisper) + TTS (Generative)
+-   **Web Frontend**: HTMX + Tailwind + Jinja2 (SSR/SPA Hybrid)
+-   **Infra & Ops**: Docker, Conda, Local/Prod Environment Separation
 
 ---
 
 ## 2. Backend Layered Architecture
 
-### 2.1 Directory Standard Structure and Layer Responsibilities
-
-The project's folder structure and the detailed responsibilities of each layer follow the **`Folder_Standards_eng.md`** document.
+### 2.1 Directory Standards and Layer Responsibilities
+The project's folder structure and physical placement of each layer follow the **`Folder_Standards.md`** document.
+*(Must adhere to SRP principles and Clean Architecture defined in Master Rule)*
 
 ---
 
 ## 3. Request Lifecycle
 
-### 3.1 Text-based Query (RAG / Chatbot)
+### 3.1 Text-Based Query (RAG / Chatbot)
 
-1.  **Client**: `POST` request to `/api/chat`.
-2.  **Router**: Validates input and calls the `Service`.
+1.  **Client**: `POST` request to `/api/chat`
+2.  **Router**: Calls `Service` after RequestModel validation
 3.  **Service**:
-    -   Retrieves user metadata.
-    -   Calls the LangGraph/RAG pipeline.
-    -   Transforms the result into a `ResponseModel`.
-4.  **Router**: Returns the `ResponseModel` to the client.
-5.  **Logger**: Records the request, response, and latency.
+    -   Retrieves User Context (Metadata)
+    -   Executes **LangGraph Pipeline** (Retrieval → Reasoning → Generation)
+    -   Maps result to `ResponseModel`
+4.  **Router**: Returns final JSON response
+5.  **Logger**: Records Latency and Token Usage (JSON structure)
 
-### 3.2 Voice-based Query (STT → RAG → TTS)
+### 3.2 Voice-Based Query (STT → RAG → TTS)
 
-1.  **Client**: Uploads a voice file to `/api/voice-chat`.
-2.  **Router**: Temporarily saves the file and calls the `Service`.
+1.  **Client**: Uploads Audio Blob to `/api/voice-chat`
+2.  **Router**: Calls `Service` after saving temporary file (Temp)
 3.  **Service**:
-    -   Converts audio to text via STT.
-    -   Reuses the text-based RAG flow.
-    -   Converts the generated answer to a voice file via TTS.
-4.  **Router**: Returns both the text answer and the voice file URL.
+    -   **STT Engine**: Audio → Text conversion
+    -   **Text Pipeline**: Reuses RAG flow from 3.1 (Code Reusability)
+    -   **TTS Engine**: Generated Answer (Text) → Audio conversion
+4.  **Router**: Returns Text Answer (JSON) + Audio File URL
+5.  **Cleanup**: Deletes temporary upload file after request completion (Complies with Antigravity Safety Rule)
 
 ---
 
 ## 4. AI / RAG / LangGraph Architecture
 
-> For detailed implementation rules for each stage of the RAG pipeline, please refer to the **`RAG_eng.md`** document.
+> **Note:** Detailed implementation figures (Chunk size, etc.) prioritize settings in `Master Rule`.
 
-### 4.1 RAG Pipeline
+### 4.1 RAG Pipeline (Standard Flow)
 
 #### Ingestion
--   Extract text from source documents like PDF, DOCX.
--   Remove unnecessary text and add metadata such as document type and section.
+-   Source: Unstructured data like PDF, DOCX, HWP
+-   Process: Text Extraction → Metadata Tagging (Source, Page, Date)
 
 #### Chunking & Embedding
--   `chunk_size = 800`, `chunk_overlap = 200`
--   Embedding Model: `ko-sbert` or `e5-base`
--   Vector DB: `FAISS`, etc.
+-   **Spec:** `chunk_size = 800`, `chunk_overlap = 200` (Sync with Master Rule)
+-   **Model:** `ko-sbert-nli` (Optimized for Semantic Search)
+-   **DB:** Vector DB (FAISS/Chroma) + Metadata Filtering
 
-#### Retrieval
--   BM25 + Dense Hybrid search.
--   Apply a Reranker to the Top-N candidates to select the final candidates.
+#### Retrieval (Hybrid)
+-   **Algorithm:** `BM25` (Keyword) + `Dense` (Semantic)
+-   **Rerank:** Re-ranking with Cross-Encoder after candidate extraction (Late Reranking)
 
 #### Answer Generation
--   Generate an answer based on the selected `chunk`.
--   Specify the source/evidence in the answer.
--   Can be converted to official document or report style if needed.
-
-#### Post-processing
--   Filter prohibited words.
--   Organize the final response into JSON or Markdown format.
-
----
+-   **Model Strategy:**
+    -   **Default:** `SKT A.X-4.0` (API)
+    -   **Fallback:** `Ollama` (Local)
+-   **Format:** Specify Reasoning Trace and Citation when generating answers
 
 ### 4.2 LangGraph Structure
-
--   Graph definition file location: `/app/ai/graph.py`
-
-#### Example Nodes
--   `question_router_node`
--   `retrieval_node`
--   `rerank_node`
--   `generation_node`
--   `postprocess_node`
-
-#### Invocation Method
--   Called from the `Service` layer in the form of `run_graph(input_state)`.
+-   **Location:** `/app/ai/graph.py`
+-   **Node Design:**
+    -   `router_node`: Question Intent Classification (General vs RAG)
+    -   `retrieval_node`: Document Search
+    -   `generation_node`: Answer Generation
+    -   `grade_node`: Answer Quality Evaluation (Hallucination Check)
 
 ---
 
 ## 5. Voice Pipeline (STT / TTS)
 
-### 5.1 STT
--   **Engine**: `Whisper` or `Faster-Whisper`
--   **Function**: Converts audio file to text.
--   **Options**: Automatic language detection, noise removal, etc.
+### 5.1 STT (Speech-to-Text)
+-   **Engine:** `Faster-Whisper` (Local/GPU Optimized)
+-   **Optimization:** `Beam Size=5`, `VAD_filter=True`
+-   **Language:** Korean (ko) Auto Detection
 
-### 5.2 TTS
--   **Engine**: `gTTS` or a commercial TTS API.
--   **Function**: Generates an audio file from text.
--   **File Management**: Uses a regular filename combining `timestamp` and `user_id`.
+### 5.2 TTS (Text-to-Speech)
+-   **Engine:** `gTTS` (Basic) or Commercial API
+-   **Output:** `.mp3` or `.wav`
+-   **Naming:** `{timestamp}_{uuid}.mp3` (Conflict Prevention)
 
 ### 5.3 Pipeline Rules
--   The STT → RAG → TTS flow is managed as a single workflow in the `Service` layer.
--   The `Router` is only responsible for receiving files and calling the `Service`.
+-   STT and TTS are managed as separate modules in the `Service` layer.
+-   Router handles only File I/O without business logic.
 
 ---
 
@@ -132,64 +123,66 @@ The project's folder structure and the detailed responsibilities of each layer f
       └── loader.html
 ```
 
-### 6.2 HTMX Rules
--   HTMX request API paths use the `/api/*` namespace.
--   **Example**: `<form hx-post="/api/chat" hx-target="#chat-window" hx-swap="beforeend">`
--   Must use `hx-indicator` to show a loading state to the user.
+### 6.2 HTMX Integration Rules
+-   **Namespace:** All `hx-post`, `hx-get` requests use the `/api/` prefix.
+-   **Implementation Pattern:**
+    -   **Form Example:** `<form hx-post="/api/chat" hx-target="#chat-window" hx-swap="beforeend">`
+    -   **Loading:** Must display Spinner/Loading Bar during AI processing using `hx-indicator`.
 
-### 6.3 Design Principles
--   **Mobile First**
--   Card-based UI, ensure sufficient whitespace.
--   Provide user-friendly error messages.
+### 6.3 UI/UX Design Principles
+-   **Mobile First:** Design for mobile screens first using Tailwind's `md:`, `lg:` prefixes.
+-   **Card UI:** Compose content with **Card-type UI** with sufficient whitespace to improve readability.
+-   **Feedback:** When 4xx/5xx errors occur, provide Toast or Modal notifications with **user-friendly sentences** instead of exposing system logs.
 
 ---
 
 ## 7. Infra / Environment / Deployment
 
-### 7.1 Environment Separation
--   Separate `local`, `staging`, and `prod` environments.
--   Manage settings for each environment via `.env` files.
+### 7.1 Environment Separation and Configuration
+-   **Environment:** Clearly separate `local`, `staging`, and `prod` environments.
+-   **Config:** Manage settings for each environment with `.env` files, including mandatory variables from Master Rule like `AX_MODEL_NAME`.
 
-### 7.2 GPU / LLM Server
--   The STT/LLM server can be physically separated from the web server.
--   Manage dependencies and environment versions via `conda` environment, `requirements.txt`, and `env.yml`.
+### 7.2 Dependency & Resource Management
+-   **Package:** Fix dependencies and Python versions via `conda` environment, `requirements.txt`, or `env.yml`.
+-   **Isolation:** Engines requiring GPU resources like STT/LLM are separated from the web server at the process/container level to ensure operational stability.
 
-### 7.3 Logging/Monitoring
--   **Key Metrics**: Request count, response time, error rate.
--   **Log Items**: `path`, `method`, `status_code`, `latency`, `user_id`, etc.
+### 7.3 Logging & Monitoring
+-   **Metrics:** Monitor Request Count (RPS), Response Time (Latency), and Error Rate as key indicators.
+-   **Log Fields:** All logs must include `path`, `method`, `status_code`, `latency`, and `user_id` for traceability.
 
 ---
 
 ## 8. Cross-Cutting Concerns
 
-### 8.1 Common Error Handling
--   Global exception handlers are defined in `/app/core/exception_handlers.py`.
--   **Error Response Format**:
+### 8.1 Global Error Handling
+-   **Location:** Global exception handler is defined in `/app/core/exception_handlers.py`.
+-   **Response Format (Standard):**
     ```json
     {
-      "error_code": "...",
-      "message": "...",
-      "detail": "..."
+      "error_code": "E400",
+      "message": "Input value is invalid.",
+      "detail": "Field 'query' is missing."
     }
     ```
 
 ### 8.2 Security
--   Apply a minimal `CORS` policy.
--   Prohibit logging of sensitive information (personal info, API keys, etc.).
+-   **CORS:** Apply a whitelist policy allowing only minimal Origins.
+-   **Privacy:** Sensitive information like PII or API Keys must be masked when saving logs.
 
 ### 8.3 Configuration Management
--   Manage settings in `/app/core/config.py` using Pydantic's `BaseSettings`.
+-   **Library:** Load settings in a Type-safe manner using `Pydantic`'s `BaseSettings` in `/app/core/config.py`.
 
 ---
 
-## 9. Architectural Principles (Summary)
+## 9. Architectural Manifesto (Core Principles)
+*Agents should use the following 5 principles as the final checklist when designing code.*
 
--   Prioritize **Clean Architecture**.
--   Business logic is concentrated in the **`services`** layer.
--   The AI engine is separated as an independent component.
--   Design a structure that is easily expandable to other domains.
--   Design reusable pipelines.
+1.  **Clean Architecture First:** All code prioritizes adherence to layer dependency rules. (Controller → Service → Repository/AI)
+2.  **Thin Router, Fat Service:** `Router` only handles request validation and return, while all business logic is concentrated in the **`Service`** layer.
+3.  **Decoupled AI Engine:** AI/LLM parts (LangGraph, Prompt) are separated from business logic so that service code is not affected even if models change.
+4.  **Universal Extensibility:** Aim for a module structure that is not dependent on a specific domain (e.g., Paju City) and can be immediately extended/replicated to other domains.
+5.  **Reusable Pipeline:** STT, TTS, and RAG pipelines are implemented as reusable **Class or Module** units, not disposable functions.
 
 ---
 
-# End of KevinCY-Kodex Architecture
+# End of Architecture Guideline
