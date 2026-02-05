@@ -88,5 +88,5 @@
 -   **Code Samples (MIT License):** 상업적 이용을 포함한 제한 없는 코드 사용 허용.
 
 ---
-**Build robust, Run safe.**
+
 *Copyright (c) 2025 KevinCY-Kim. All rights reserved.*
